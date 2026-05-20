@@ -69,14 +69,14 @@ sec4_pages = [
     ),
 ]
 
-# Section 5: Demo Apps
-sec5_pages = [
-    st.Page(
-        "apps/section5_01_rate.py",
-        title="Rate",
-        icon="♻️",
-    ),
-]
+# # Section 5: Demo Apps
+# sec5_pages = [
+#     st.Page(
+#         "apps/section5_01_rate.py",
+#         title="Rate",
+#         icon="♻️",
+#     ),
+# ]
 
 # Navigation setup
 pg = st.navigation(
