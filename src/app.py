@@ -8,9 +8,7 @@ from streamlit.starlette import App
 
 # 匯入所有自定義功能模組
 from api import (
-    dataframe_demo, json_demo, security, 
-    lifecycle, exceptions, metadata, 
-    interop, realtime, gsheet_api, finance
+    dataframe_demo, json_demo
 )
 
 # 1.2 Serving Static Assets (Handled by Mount in 'routes' list)
@@ -22,22 +20,6 @@ from api import (
 
 
 # --- 4.1 生命週期管理 ( wiring lifecycle and interop ) ---
-@asynccontextmanager
-async def lifespan(app):
-    print("🚀 App starting: Initializing resources...")
-
-    # 4.1 & 4.2: Initialize resources & warm cache
-    await lifecycle.db_connection.connect()
-    await lifecycle.prewarm_ml_model()
-    await lifecycle.gs_manager.connect()  # 初始化 gspread
-
-    # Initialize sub-apps (MCP)
-    async with interop.mcp_app.lifespan(app):
-        yield
-
-    # Cleanup
-    print("👋 App shutting down: Cleaning up resources...")
-    await lifecycle.db_connection.disconnect()
 
 
 # ==============================================================================
@@ -56,41 +38,13 @@ routes = [
     Route("/api/df-csv", dataframe_demo.dataframe_csv_demo),
     Route("/api/excel-demo", dataframe_demo.excel_response_demo),
     Route("/api/stock-parquet", dataframe_demo.stock_data_parquet_demo),
-
-    # 1.2 Serving Static Assets
-    Mount("/landing", app=StaticFiles(directory="src/landing", html=True), name="landing"),
-    # Mount("/static", app=StaticFiles(directory="src/static"), name="static"),  # 存放靜態資料
-
-    # 1.3 SEO & Metadata Endpoints
-    Route("/robots.txt", metadata.robots_txt),
-    Route("/sitemap.xml", metadata.sitemap_xml),
-    Route("/manifest.json", metadata.manifest_json),
-
-    # Section 3: Security Helpers (Moved up to avoid shadowing)
-    Route("/api/security/simulate-ip", security.simulate_ip_policy),
-
-    # Section 4: Performance (Moved up to avoid shadowing)
-    Route("/api/background/email", lifecycle.background_email, methods=["POST"]),
-    Route("/api/trigger-error", exceptions.trigger_error),
     
     # # 自定義, 新增 Google Sheet 轉 Parquet 的 API
     # Route("/api/gsheet/parquet", gsheet_api.pull_sheet_as_parquet),
     # Route("/api/gsheet/batch-warmup", gsheet_api.trigger_batch_warmup),
     # Route("/api/finance/bot-rates", finance.get_bot_rates_api),  # 整合進 FastAPI
-
-    # Section 2: Framework Interop & WebSockets
-    Mount("/api", app=interop.fastapi),  # 看到 /api 開頭的請求都交給 fastapi, docs/ 也會掛在 /api 下
-    WebSocketRoute("/realtime", realtime.websocket_endpoint),
-    Mount("/analytics", app=interop.mcp_app),  # mcp server 需在 Starlette 之前產生, 需借助 lifespan
 ]
 
-middleware = [
-    Middleware(security.CookieMiddleware),
-    Middleware(security.IPWhitelistMiddleware),
-    Middleware(security.SecurityHeadersMiddleware),
-    # Middleware(security.APIKeyMiddleware),  # 需要時再打開
-    # Middleware(security.RateLimitMiddleware),  # 需要時再打開
-]
 print("[app] DEBUG 1")
 # 組合出 streamlit_app.py 的絕對路徑
 current_dir = os.path.dirname(os.path.abspath(__file__)) 
@@ -102,8 +56,8 @@ print("[app] DEBUG 2")
 app = App(
     st_app_path,
     routes=routes,
-    middleware=middleware,
-    lifespan=lifespan,
-    exception_handlers=exceptions.exception_handlers,
+    # middleware=middleware,
+    # lifespan=lifespan,
+    # exception_handlers=exceptions.exception_handlers,
 )
 print("[app] DEBUG 3")
