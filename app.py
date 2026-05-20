@@ -79,7 +79,7 @@ routes = [
     # Route("/api/finance/bot-rates", finance.get_bot_rates_api),  # 整合進 FastAPI
 
     # Section 2: Framework Interop & WebSockets
-    Mount("/api", app=interop.fastapi),  # 看到 /api 開頭的請求都交給 fastapi
+    Mount("/api", app=interop.fastapi),  # 看到 /api 開頭的請求都交給 fastapi, docs/ 也會掛在 /api 下
     WebSocketRoute("/realtime", realtime.websocket_endpoint),
     Mount("/analytics", app=interop.mcp_app),  # mcp server 需在 Starlette 之前產生, 需借助 lifespan
 ]
@@ -94,7 +94,10 @@ middleware = [
 
 # 組合出 streamlit_app.py 的絕對路徑
 current_dir = os.path.dirname(os.path.abspath(__file__)) 
-st_app_path = os.path.join(current_dir, "streamlit_app.py")
+st_app_path = os.path.join(current_dir, "src", "streamlit_app.py")
+# 檢查檔案是否存在 (增加一點防錯機制，方便 Debug)
+if not os.path.exists(st_app_path):
+    print(f"❌ 找不到 Streamlit 檔案路徑: {st_app_path}")
 
 app = App(
     st_app_path,

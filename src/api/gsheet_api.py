@@ -81,6 +81,10 @@ async def pull_sheet_as_parquet(
     if df.empty:
         raise HTTPException(status_code=500, detail="無法從 Google Sheets 取得資料")
 
+    # --- [型別清洗邏輯] ---
+    # 將所有空字串 '' 替換為真正的 np.nan (Parquet 接受浮點數欄位裡有 NaN)
+    df = df.replace('', np.nan)
+
     # 轉為 Parquet 二進位流
     output = io.BytesIO()
     df.to_parquet(output, index=False, engine='pyarrow')

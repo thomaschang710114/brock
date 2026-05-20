@@ -1,3 +1,2 @@
 [server]
 runOnSave = true
-useStarlette = true
