@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamlit-Starlette Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center font-sans">
+    <div class="glass p-12 rounded-2xl shadow-2xl max-w-2xl text-center transform transition-all hover:scale-105">
+        <h1
+            class="text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            Streamlit + Starlette
+        </h1>
+        <p class="text-xl mb-8 text-slate-300">
+            Welcome to the ultimate tech demo. You are viewing a static landing page served by Starlette,
+            running inside the same process as a multipage Streamlit application.
+        </p>
+        <div class="flex justify-center gap-4">
+            <a href="/"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-200">
+                Go to Dashboard
+            </a>
+            <a href="/api/docs"
+                class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-full transition-colors duration-200">
+                API Docs
+            </a>
+        </div>
+        <div class="mt-12 pt-8 border-t border-slate-700 text-slate-400 text-sm">
+            Powered by <code>streamlit[starlette]</code>
+        </div>
+    </div>
+</body>
+
+</html>
