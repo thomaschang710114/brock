@@ -60,10 +60,14 @@ class GoogleSheetManager:
         """在 Lifespan 啟動時建立連線"""
         # 優先從 Streamlit Secrets 讀取
         if "gsheets" in st.secrets:
+            print('[Lifecycle] DEBUG 1')
             creds_dict = dict(st.secrets["gsheets"])
+            print('[Lifecycle] DEBUG 2')
             self.client = gspread.service_account_from_dict(creds_dict)
+            print('[Lifecycle] DEBUG 3')
             print("   ✅ [Lifecycle] 使用 Streamlit Secrets Google Sheets API 連線成功")
         else:
+            print('[Lifecycle] DEBUG 4')
             try:
                 scopes = [
                     # GMAIL
@@ -78,8 +82,9 @@ class GoogleSheetManager:
                 service_account_file = os.path.expanduser(self._path)
                 with open(service_account_file) as f:
                     info = json.load(f)
-                
+                print('[Lifecycle] DEBUG 5')
                 creds = service_account.Credentials.from_service_account_info(info, scopes=scopes)
+                print('[Lifecycle] DEBUG 6')
                 self.client = gspread.authorize(creds)
                 print("\n   ✅ [Lifecycle] Google Sheets API 連線成功")
             except Exception as e:
