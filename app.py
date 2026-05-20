@@ -91,14 +91,14 @@ middleware = [
     # Middleware(security.APIKeyMiddleware),  # 需要時再打開
     # Middleware(security.RateLimitMiddleware),  # 需要時再打開
 ]
-
+print("[app] DEBUG 1")
 # 組合出 streamlit_app.py 的絕對路徑
 current_dir = os.path.dirname(os.path.abspath(__file__)) 
 st_app_path = os.path.join(current_dir, "src", "streamlit_app.py")
 # 檢查檔案是否存在 (增加一點防錯機制，方便 Debug)
 if not os.path.exists(st_app_path):
     print(f"❌ 找不到 Streamlit 檔案路徑: {st_app_path}")
-
+print("[app] DEBUG 2")
 app = App(
     st_app_path,
     routes=routes,
@@ -106,3 +106,4 @@ app = App(
     lifespan=lifespan,
     exception_handlers=exceptions.exception_handlers,
 )
+print("[app] DEBUG 3")
