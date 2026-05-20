@@ -4,6 +4,7 @@ import os
 
 from google.oauth2 import service_account
 import gspread
+import streamlit as st
 from starlette.background import BackgroundTask
 from starlette.responses import JSONResponse
 
@@ -57,26 +58,32 @@ class GoogleSheetManager:
 
     async def connect(self):
         """在 Lifespan 啟動時建立連線"""
-        try:
-            scopes = [
-                # GMAIL
-                'https://mail.google.com/',
-                'https://www.googleapis.com/auth/gmail.modify',
-                'https://www.googleapis.com/auth/gmail.compose',
-                'https://www.googleapis.com/auth/gmail.send',
-                # SHEETS & DRIVE
-                'https://www.googleapis.com/auth/spreadsheets',
-                'https://www.googleapis.com/auth/drive'
-            ]
-            service_account_file = os.path.expanduser(self._path)
-            with open(service_account_file) as f:
-                info = json.load(f)
-            
-            creds = service_account.Credentials.from_service_account_info(info, scopes=scopes)
-            self.client = gspread.authorize(creds)
-            print("\n   ✅ [Lifecycle] Google Sheets API 連線成功")
-        except Exception as e:
-            print(f"   ❌ [Lifecycle] Google Sheets 連線失敗: {e}")
+        # 優先從 Streamlit Secrets 讀取
+        if "gsheets" in st.secrets:
+            creds_dict = dict(st.secrets["gsheets"])
+            self.client = gspread.service_account_from_dict(creds_dict)
+            print("   ✅ [Lifecycle] 使用 Streamlit Secrets Google Sheets API 連線成功")
+        else:
+            try:
+                scopes = [
+                    # GMAIL
+                    'https://mail.google.com/',
+                    'https://www.googleapis.com/auth/gmail.modify',
+                    'https://www.googleapis.com/auth/gmail.compose',
+                    'https://www.googleapis.com/auth/gmail.send',
+                    # SHEETS & DRIVE
+                    'https://www.googleapis.com/auth/spreadsheets',
+                    'https://www.googleapis.com/auth/drive'
+                ]
+                service_account_file = os.path.expanduser(self._path)
+                with open(service_account_file) as f:
+                    info = json.load(f)
+                
+                creds = service_account.Credentials.from_service_account_info(info, scopes=scopes)
+                self.client = gspread.authorize(creds)
+                print("\n   ✅ [Lifecycle] Google Sheets API 連線成功")
+            except Exception as e:
+                print(f"   ❌ [Lifecycle] Google Sheets 連線失敗: {e}")
 
 
 gs_manager = GoogleSheetManager()
