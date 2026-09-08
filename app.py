@@ -33,20 +33,24 @@ from src.api.framework import exceptions, interop, lifecycle, metadata, realtime
 # --- 4.1 生命週期管理 ( wiring lifecycle and interop ) ---
 @asynccontextmanager
 async def lifespan(app):
-    print("🚀 App starting: Initializing resources...")
+    # print("🚀 App starting: Initializing resources...")
 
-    # 4.1 & 4.2: Initialize resources & warm cache
-    await lifecycle.db_connection.connect()
-    await lifecycle.prewarm_ml_model()
-    await lifecycle.gs_manager.connect()  # 初始化 gspread
+    # # 4.1 & 4.2: Initialize resources & warm cache
+    # await lifecycle.db_connection.connect()
+    # await lifecycle.prewarm_ml_model()
+    # await lifecycle.gs_manager.connect()  # 初始化 gspread
 
-    # Initialize sub-apps (MCP)
-    async with interop.mcp_app.lifespan(app):
-        yield
+    # # Initialize sub-apps (MCP)
+    # async with interop.mcp_app.lifespan(app):
+    #     yield
 
-    # Cleanup
-    print("👋 App shutting down: Cleaning up resources...")
-    await lifecycle.db_connection.disconnect()
+    # # Cleanup
+    # print("👋 App shutting down: Cleaning up resources...")
+    # await lifecycle.db_connection.disconnect()
+    
+    print("🚀 App starting...")
+    yield
+    print("👋 App shutting down...")
 
 
 # ==============================================================================
