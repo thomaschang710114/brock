@@ -2,7 +2,7 @@ from io import BytesIO, StringIO
 import time
 import requests
 
-import numpy as np
+# import numpy as np
 import pandas as pd
 
 import streamlit as st
@@ -20,6 +20,7 @@ st.markdown("Fetch raw JSON data from `/api/raw-data`.")
 
 if st.button("Fetch Raw Data", key="json"):
     res = requests.get(f"{api_base_url}/api/raw-data", headers=HEADERS)
+    st.text(res.text)
     st.json(res.json())
 
 st.divider()
@@ -98,10 +99,10 @@ if st.button("Fetch DF as CSV", key="dfcsv"):
     if res.status_code == 200:
         csv_text = res.text
         st.text_area("Raw CSV Output", csv_text, height=150)
-        
+
         # 示範如何轉回 dataframe 顯示
         df_from_csv = pd.read_csv(StringIO(csv_text))
-        st.table(df_from_csv) # 用 st.table 顯示靜態表格
+        st.table(df_from_csv)  # 用 st.table 顯示靜態表格
 
 st.divider()
 
@@ -134,16 +135,17 @@ def excel_demo_fragment():
     if st.session_state.excel_sheets is not None:
         sheets = st.session_state.excel_sheets
         selected = st.selectbox("Select a sheet:", list(sheets.keys()), key="sheet_sel")
-        
+
         st.success(f"Showing: {selected}")
         st.dataframe(sheets[selected], width="stretch")
-        
+
         st.download_button(
             "Download Excel",
             data=st.session_state.excel_binary,
             file_name="report.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+
 
 # 執行這個片段
 excel_demo_fragment()
@@ -154,6 +156,7 @@ st.divider()
 st.subheader("🚀 High-Performance Parquet Data")
 st.markdown("模擬從後端抓取 10 萬筆成交資料。Parquet 是處理大數據量時的首選格式。")
 
+
 @st.fragment
 def parquet_demo_fragment():
     if "parquet_df" not in st.session_state:
@@ -161,18 +164,18 @@ def parquet_demo_fragment():
 
     if st.button("Fetch 100,000 Rows (Parquet)", key="parquet_btn"):
         start_time = time.time()
-        
+
         with st.spinner("Downloading and parsing binary Parquet..."):
             res = requests.get(f"{api_base_url}/api/stock-parquet")
-            
+
             if res.status_code == 200:
                 df = pd.read_parquet(BytesIO(res.content))
                 # 把 "object" 轉為 Arrow 喜歡的 "datetime64[ns]"
                 df['timestamp'] = pd.to_datetime(df['timestamp'])
-                
+
                 # 關鍵：直接用 BytesIO 包裝二進位內容並讀取
                 st.session_state.parquet_df = df
-                
+
                 duration = time.time() - start_time
                 st.success(f"Successfully loaded {len(st.session_state.parquet_df):,} rows in {duration:.2f} seconds!")
             else:
@@ -180,7 +183,7 @@ def parquet_demo_fragment():
 
     if st.session_state.parquet_df is not None:
         df = st.session_state.parquet_df
-        
+
         # # # 顯示統計資訊( .dexcribe 會有其它警告, 改用下面方式分開呼叫)
         # # st.write("Data Statistics:")
         # # st.dataframe(df.describe(), width="stretch")
@@ -188,16 +191,17 @@ def parquet_demo_fragment():
         # # 只挑選數值型別的欄位進行統計
         # numeric_stats = df.select_dtypes(include=['number']).describe()
         # st.dataframe(numeric_stats, width="stretch")
-        
+
         # st.write("🔠 類別欄位統計 (Categorical Stats):")
         # # 如果你也想看 symbol 的統計（次數、不重複數等）
         # categorical_stats = df.select_dtypes(include=['object', 'str']).describe().T
         # st.dataframe(categorical_stats, width="stretch")
-        
+
         # 顯示前幾筆資料
         st.text(df.dtypes)
         st.write("Last 10 records:")
         st.dataframe(df.tail(10), width="stretch")
+
 
 parquet_demo_fragment()
 
@@ -210,33 +214,34 @@ st.markdown("從 Google Sheet 讀取資料。")
 TEST_SPREADSHEET_ID = '1uJ4hZES1KaVkK94rgpmy25rrx86I768ix-00bpj4myE'
 TEST_SHEET_NAME = 'Rate'
 
+
 @st.fragment
 def parquet_demo_fragment_gsheet():
     if "parquet_df_gsheet" not in st.session_state:
         st.session_state.parquet_df_gsheet = None
-    
+
     if st.button("Read Google Sheet", key="parquet_gsheet_btn"):
         start_time = time.time()
         with st.spinner("Downloading and parsing binary Parquet..."):
             params = {"id": TEST_SPREADSHEET_ID, "sheet": TEST_SHEET_NAME}
             res = requests.get(f"{api_base_url}/api/gsheet/parquet", params=params)
-            
+
             if res.status_code == 200:
                 df = pd.read_parquet(BytesIO(res.content))
                 # # 把 "object" 轉為 Arrow 喜歡的 "datetime64[ns]"
                 # df['日期'] = pd.to_datetime(df['日期'])
-                
+
                 # 關鍵：直接用 BytesIO 包裝二進位內容並讀取
                 st.session_state.parquet_df_gsheet = df
-                
+
                 duration = time.time() - start_time
                 st.success(f"Successfully loaded {len(st.session_state.parquet_df_gsheet):,} rows in {duration:.2f} seconds!")
             else:
                 st.error("Failed to fetch Parquet data.")
-    
+
     if st.session_state.parquet_df_gsheet is not None:
         df = st.session_state.parquet_df_gsheet
-        
+
         # 顯示前幾筆資料
         st.text(df.dtypes)
         st.write("Last 10 records:")

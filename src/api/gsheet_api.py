@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 
 from fastapi import APIRouter, Query, HTTPException
-from starlette.responses import Response, JSONResponse
-from src.api.lifecycle import gs_manager
+from starlette.responses import Response
+from src.api.framework.lifecycle import gs_manager
 
 # 處理從 Google Sheets 抓取資料並轉換格式的邏輯
 

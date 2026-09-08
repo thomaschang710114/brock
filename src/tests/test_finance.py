@@ -17,8 +17,8 @@ from src.api.gsheet_api import get_gsheet_df
 # api_app = Starlette(routes=[
 #     Route("/bot-rates", get_bot_rates_api)
 # ])
-from src.api.interop import fastapi as api_app # 直接拿 FastAPI 來測
-from src.api.lifecycle import gs_manager
+from src.api.framework.interop import fastapi as api_app # 直接拿 FastAPI 來測
+from src.api.framework.lifecycle import gs_manager
 
 
 @pytest_asyncio.fixture(scope="module", autouse=True)

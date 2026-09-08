@@ -1,4 +1,11 @@
-import streamlit as st
+from pathlib import Path
+import sys
+# 取得專案根目錄並加入 sys.path
+ROOT_DIR = str(Path(__file__).resolve().parent.parent)
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
+import streamlit as st  # noqa: E402
 
 # Define pages
 home_page = st.Page("apps/home.py", title="Home", icon="🏠", default=True)

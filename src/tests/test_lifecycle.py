@@ -2,7 +2,7 @@ import os
 import sys
 import pytest
 
-from src.api.lifecycle import gs_manager
+from src.api.framework.lifecycle import gs_manager
 
 
 @pytest.mark.asyncio

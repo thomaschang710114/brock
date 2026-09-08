@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+import sys
 from contextlib import asynccontextmanager
 
 from starlette.middleware import Middleware
@@ -6,12 +8,19 @@ from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from streamlit.starlette import App
 
+# 1. 取得專案根目錄並加入 sys.path
+# ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT_DIR = str(Path(__file__).resolve().parent.parent)
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
+# 2. 需要根目錄 sys.path 的自訂模組 (僅在此處加上 # noqa: E402)
 # 匯入所有自定義功能模組
-from src.api import (
-    dataframe_demo, json_demo, security, 
-    lifecycle, exceptions, metadata, 
-    interop, realtime, gsheet_api, finance
-)
+from src.api.demo import dataframe_demo, json_demo  # noqa: E402
+from src.api.framework import exceptions, interop, lifecycle, metadata, realtime, security  # noqa: E402
+# from src.api import (
+#     gsheet_api, finance
+# )
 
 # 1.2 Serving Static Assets (Handled by Mount in 'routes' list)
 
@@ -72,7 +81,7 @@ routes = [
     # Section 4: Performance (Moved up to avoid shadowing)
     Route("/api/background/email", lifecycle.background_email, methods=["POST"]),
     Route("/api/trigger-error", exceptions.trigger_error),
-    
+
     # # 自定義, 新增 Google Sheet 轉 Parquet 的 API
     # Route("/api/gsheet/parquet", gsheet_api.pull_sheet_as_parquet),
     # Route("/api/gsheet/batch-warmup", gsheet_api.trigger_batch_warmup),
@@ -91,19 +100,27 @@ middleware = [
     # Middleware(security.APIKeyMiddleware),  # 需要時再打開
     # Middleware(security.RateLimitMiddleware),  # 需要時再打開
 ]
-print("[app] DEBUG 1")
+
 # 組合出 streamlit_app.py 的絕對路徑
-current_dir = os.path.dirname(os.path.abspath(__file__)) 
+current_dir = os.path.dirname(os.path.abspath(__file__))
 st_app_path = os.path.join(current_dir, "src", "streamlit_app.py")
 # 檢查檔案是否存在 (增加一點防錯機制，方便 Debug)
 if not os.path.exists(st_app_path):
     print(f"❌ 找不到 Streamlit 檔案路徑: {st_app_path}")
-print("[app] DEBUG 2")
-app = App(
+
+raw_app = App(
     st_app_path,
     routes=routes,
     middleware=middleware,
     lifespan=lifespan,
     exception_handlers=exceptions.exception_handlers,
 )
-print("[app] DEBUG 3")
+
+# app = raw_app
+# app = security.CookieMiddleware(app)
+# app = security.IPWhitelistMiddleware(app)
+# app = security.SecurityHeadersMiddleware(app)
+# # app = security.APIKeyMiddleware(app)
+# # app = security.RateLimitMiddleware(app)
+# # 包裹順序建議：Shield 放在最外面
+# app = security.WSProtocolShield(app, raw_app=raw_app)

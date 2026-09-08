@@ -1,7 +1,7 @@
 import pytest
 from starlette.requests import Request
 
-from src.api.system import NodeIdentity
+from src.api.framework.system import NodeIdentity
 
 @pytest.mark.asyncio
 async def test_server_info():
